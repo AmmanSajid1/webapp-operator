@@ -3,5 +3,5 @@ kind: WebApp
 metadata:
   name: my-webapp
 spec:
-  image: nginx:latest
-  replicas: 2
+  image: nginx:1.25
+  replicas: 3

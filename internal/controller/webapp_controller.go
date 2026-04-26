@@ -118,7 +118,30 @@ func (r *WebAppReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
-	log.Info("Deployment already exists", "name", existing.Name)
+	needsUpdated := false
+
+	// Check if replicas changed
+	if existing.Spec.Replicas == nil || *existing.Spec.Replicas != webapp.Spec.Replicas {
+		existing.Spec.Replicas = &webapp.Spec.Replicas
+		needsUpdated = true
+	}
+
+	// Check if image changed
+	currentImage := existing.Spec.Template.Spec.Containers[0].Image
+	if currentImage != webapp.Spec.Image {
+		existing.Spec.Template.Spec.Containers[0].Image = webapp.Spec.Image
+		needsUpdated = true
+	}
+
+	// Update deployment if needed
+	if needsUpdated {
+		log.Info("Updating Deployment", "name", existing.Name)
+		if err := r.Update(ctx, &existing); err != nil {
+			return ctrl.Result{}, err
+		}
+	}
+
+	log.Info("Deployment is up to date", "name", existing.Name)
 	return ctrl.Result{}, nil
 }
 
