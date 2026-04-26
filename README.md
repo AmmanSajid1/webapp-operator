@@ -1,135 +1,145 @@
-# webapp-operator
-// TODO(user): Add simple overview of use/purpose
+# WebApp Kubernetes Operator
 
-## Description
-// TODO(user): An in-depth paragraph about your project and overview of use
+A custom Kubernetes Operator built using Go and Kubebuilder that extends the Kubernetes API with a new resource type (`WebApp`) and automatically manages application deployments based on declarative specifications.
 
-## Getting Started
+---
 
-### Prerequisites
-- go version v1.24.6+
-- docker version 17.03+.
-- kubectl version v1.11.3+.
-- Access to a Kubernetes v1.11.3+ cluster.
+## 🚀 Overview
 
-### To Deploy on the cluster
-**Build and push your image to the location specified by `IMG`:**
+This project demonstrates how to extend Kubernetes using:
 
-```sh
-make docker-build docker-push IMG=<some-registry>/webapp-operator:tag
+- Custom Resource Definitions (CRDs) to define new resource types  
+- Custom Controllers to implement reconciliation logic  
+- The Operator Pattern to automate infrastructure management  
+
+Instead of manually creating Deployments, users can define a simple `WebApp` resource:
+
+```yaml
+apiVersion: apps.amman.dev/v1
+kind: WebApp
+metadata:
+  name: my-webapp
+spec:
+  image: nginx:latest
+  replicas: 2
 ```
 
-**NOTE:** This image ought to be published in the personal registry you specified.
-And it is required to have access to pull the image from the working environment.
-Make sure you have the proper permission to the registry if the above commands don’t work.
+The operator automatically creates and manages the corresponding Kubernetes Deployment.
 
-**Install the CRDs into the cluster:**
+---
+
+## 🧠 How It Works
+
+WebApp (Custom Resource) <br>
+            ↓ <br>
+Controller (Reconciliation Loop) <br>
+            ↓ <br>
+Deployment (Managed Resource) <br>
+            ↓ <br>
+Pods
+
+The controller continuously ensures that the actual cluster state matches the desired state defined in the `WebApp` spec.
+
+---
+
+## ⚙️ Features
+
+- Defines a custom Kubernetes resource: `WebApp`
+- Automatically creates a Deployment based on:
+  - Container image
+  - Replica count
+- Uses owner references for automatic cleanup
+- Implements a basic reconciliation loop
+
+---
+
+## 🛠️ Tech Stack
+
+- Go (Golang)  
+- Kubebuilder  
+- controller-runtime  
+- Kubernetes  
+
+---
+
+## 📦 Getting Started
+
+### Prerequisites
+
+- Go v1.24+  
+- Docker  
+- kubectl  
+- A running Kubernetes cluster (e.g. Minikube)  
+
+---
+
+### 1. Install CRDs
 
 ```sh
 make install
 ```
 
-**Deploy the Manager to the cluster with the image specified by `IMG`:**
+---
+
+### 2. Run the controller locally
 
 ```sh
-make deploy IMG=<some-registry>/webapp-operator:tag
+make run
 ```
 
-> **NOTE**: If you encounter RBAC errors, you may need to grant yourself cluster-admin
-privileges or be logged in as admin.
+---
 
-**Create instances of your solution**
-You can apply the samples (examples) from the config/sample:
+### 3. Apply sample resource
 
 ```sh
-kubectl apply -k config/samples/
+kubectl apply -f config/samples/apps_v1_webapp.yaml
 ```
 
->**NOTE**: Ensure that the samples has default values to test it out.
+---
 
-### To Uninstall
-**Delete the instances (CRs) from the cluster:**
+### 4. Verify resources
 
 ```sh
-kubectl delete -k config/samples/
+kubectl get webapps
+kubectl get deployments
+kubectl get pods
 ```
 
-**Delete the APIs(CRDs) from the cluster:**
+You should see a Deployment created automatically.
+
+---
+
+## 🧪 Example
+
+```yaml
+apiVersion: apps.amman.dev/v1
+kind: WebApp
+metadata:
+  name: example
+spec:
+  image: nginx:latest
+  replicas: 2
+```
+
+---
+
+## 🧹 Cleanup
 
 ```sh
+kubectl delete -f config/samples/apps_v1_webapp.yaml
 make uninstall
 ```
 
-**UnDeploy the controller from the cluster:**
+---
 
-```sh
-make undeploy
-```
+## 🎯 Learning Goals
 
-## Project Distribution
+This project was built to demonstrate:
 
-Following the options to release and provide this solution to the users.
+- How Kubernetes can be extended beyond native resources  
+- How controllers implement reconciliation loops  
+- How to build custom operators using Go  
 
-### By providing a bundle with all YAML files
+## 📄 License
 
-1. Build the installer for the image built and published in the registry:
-
-```sh
-make build-installer IMG=<some-registry>/webapp-operator:tag
-```
-
-**NOTE:** The makefile target mentioned above generates an 'install.yaml'
-file in the dist directory. This file contains all the resources built
-with Kustomize, which are necessary to install this project without its
-dependencies.
-
-2. Using the installer
-
-Users can just run 'kubectl apply -f <URL for YAML BUNDLE>' to install
-the project, i.e.:
-
-```sh
-kubectl apply -f https://raw.githubusercontent.com/<org>/webapp-operator/<tag or branch>/dist/install.yaml
-```
-
-### By providing a Helm Chart
-
-1. Build the chart using the optional helm plugin
-
-```sh
-kubebuilder edit --plugins=helm/v2-alpha
-```
-
-2. See that a chart was generated under 'dist/chart', and users
-can obtain this solution from there.
-
-**NOTE:** If you change the project, you need to update the Helm Chart
-using the same command above to sync the latest changes. Furthermore,
-if you create webhooks, you need to use the above command with
-the '--force' flag and manually ensure that any custom configuration
-previously added to 'dist/chart/values.yaml' or 'dist/chart/manager/manager.yaml'
-is manually re-applied afterwards.
-
-## Contributing
-// TODO(user): Add detailed information on how you would like others to contribute to this project
-
-**NOTE:** Run `make help` for more information on all potential `make` targets
-
-More information can be found via the [Kubebuilder Documentation](https://book.kubebuilder.io/introduction.html)
-
-## License
-
-Copyright 2026.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-
+Apache 2.0
