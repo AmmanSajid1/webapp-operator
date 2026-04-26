@@ -1,0 +1,7 @@
+apiVersion: apps.amman.dev/v1
+kind: WebApp
+metadata:
+  name: my-webapp
+spec:
+  image: nginx:latest
+  replicas: 2
